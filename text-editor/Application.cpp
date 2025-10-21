@@ -1,11 +1,10 @@
 #include "Application.hpp"
 
+#include "Renderer/Renderer.hpp"
+
 #include <SDL3/SDL.h>
 
 namespace Application {
-	bool ApplicationRunning;
-	SDL_Window* MainWindow;
-
 	void initialize() {
 		SDL_Init(SDL_INIT_VIDEO);
 
@@ -14,9 +13,13 @@ namespace Application {
 			800, 600,
 			SDL_WINDOW_RESIZABLE
 		);
+
+		Renderer::initialize();
 	}
 
 	void shutdown() {
+		Renderer::shutdown();
+
 		SDL_DestroyWindow(MainWindow);
 
 		SDL_Quit();
@@ -26,6 +29,7 @@ namespace Application {
 
 	void run() {
 		ApplicationRunning = true;
+		NeedsRender = true;
 
 		while (ApplicationRunning) {
 			mainLoop();
@@ -41,6 +45,10 @@ namespace Application {
 				ApplicationRunning = false;
 				break;
 			}
+		}
+
+		if (NeedsRender) {
+			Renderer::render();
 		}
 	}
 }
