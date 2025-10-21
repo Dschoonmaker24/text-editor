@@ -1,7 +1,9 @@
 add_executable(TextEditorApplication)
 
 target_sources(TextEditorApplication PRIVATE
-	"main.cpp"
+	"EntryPoint.cpp"
+	"Application.hpp"
+	"Application.cpp"
 )
 
 target_link_libraries(TextEditorApplication SDL3::SDL3)
