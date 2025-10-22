@@ -10,19 +10,22 @@ namespace Renderer {
         constexpr static int TileSize2 = TileSize * TileSize;
 
         struct Tile {
-            unsigned char data[3 * TileSize2];
+            //color data, laid out row by row
+            color8 data[TileSize2];
         };
 
-        const int width, height;
-        const int tileCountX, tileCountY;
+        const int2 size;
+        //number of tiles in each direction
+        const int2 directionalTileCount;
 
+        //array of tiles, laid out row by row
         Tile* const tiles;
 
-        Framebuffer(int width, int height);
+        Framebuffer(int2 size);
         ~Framebuffer();
     };
 
-    void clearFramebuffer(Framebuffer* const framebuffer, unsigned char clearValue[3]);
+    void clearFramebuffer(Framebuffer* const framebuffer, color8 clearColor);
 
     void copyFramebufferToSurface(
         const Framebuffer* const framebuffer,

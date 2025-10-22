@@ -10,17 +10,17 @@ namespace Renderer {
 	SDL_Surface* MainWindowSurface;
 	Framebuffer* MainFramebuffer;
 
-	int ViewportWidth, ViewportHeight;
+	int2 ViewportSize;
 
 	void initialize() {
 		MainWindowSurface = SDL_GetWindowSurface(Application::MainWindow);
 
 		SDL_GetWindowSizeInPixels(
 			Application::MainWindow,
-			&ViewportWidth, &ViewportHeight
+			&ViewportSize.x, &ViewportSize.y
 		);
 
-		MainFramebuffer = new Framebuffer(ViewportWidth, ViewportHeight);
+		MainFramebuffer = new Framebuffer(ViewportSize);
 	}
 
 	void shutdown() {
@@ -32,7 +32,7 @@ namespace Renderer {
 	void render() {
 		handleResizes();
 
-		unsigned char clearColor[3] = { 128u, 0u, 0u };
+		color8 clearColor = { 128, 0, 0 };
 
 		clearFramebuffer(MainFramebuffer, clearColor);
 
@@ -42,26 +42,22 @@ namespace Renderer {
 	}
 	
 	void handleResizes() {
-		int newViewportWidth, newViewportHeight;
+		int2 newViewportSize;
 
 		SDL_GetWindowSizeInPixels(
 			Application::MainWindow,
-			&newViewportWidth, &newViewportHeight
+			&newViewportSize.x, &newViewportSize.y
 		);
 
-		if (
-			ViewportWidth == newViewportWidth &&
-			ViewportHeight == newViewportHeight
-		) {
+		if (ViewportSize == newViewportSize) {
 			return;
 		}
 
-		ViewportWidth = newViewportWidth;
-		ViewportHeight = newViewportHeight;
+		ViewportSize = newViewportSize;
 
 		MainWindowSurface = SDL_GetWindowSurface(Application::MainWindow);
 
 		delete MainFramebuffer;
-		MainFramebuffer = new Framebuffer(ViewportWidth, ViewportHeight);
+		MainFramebuffer = new Framebuffer(ViewportSize);
 	}
 }

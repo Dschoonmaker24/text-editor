@@ -10,6 +10,7 @@ target_include_directories(TextEditorApplication PRIVATE
 	"${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+add_subdirectory(data-types)
 add_subdirectory(renderer)
 
 target_link_libraries(TextEditorApplication SDL3::SDL3)

@@ -8,54 +8,71 @@ namespace Renderer {
     int divideAndRoundUp(int value, int divisor) {
         return (value - 1) / divisor + 1;
     }
-
-    //set reasonable limits on framebuffer size,
-    //e.g. only positive sizes
-    int clampFramebufferDimension(int framebufferDimension) {
-        return framebufferDimension < 1 ? 1 : framebufferDimension;
+    
+    //framebuffer size, with a minimum size of 1x1
+    int2 getFramebufferSize(int2 desiredSize) {
+        int2 size = desiredSize;
+        size.x = size.x < 1 ? 1 : size.x;
+        size.y = size.y < 1 ? 1 : size.y;
+        
+        return size;
     }
 
-    Framebuffer::Tile* initializeFramebufferTiles(int pixelWidth, unsigned int pixelHeight) {
-        int tileCountX = divideAndRoundUp(pixelWidth, Framebuffer::TileSize);
-        int tileCountY = divideAndRoundUp(pixelHeight, Framebuffer::TileSize);
+    int2 getDirectionalTileCount(int2 sizePixels) {
+        int2 directionalTileCount;
+        directionalTileCount.x = divideAndRoundUp(sizePixels.x, Framebuffer::TileSize);
+        directionalTileCount.y = divideAndRoundUp(sizePixels.y, Framebuffer::TileSize);
 
-        int tileCount = tileCountX * tileCountY;
+        return directionalTileCount;
+    }
+
+    Framebuffer::Tile* initializeFramebufferTiles(int2 directionalTileCount) {
+        int tileCount = directionalTileCount.x * directionalTileCount.y;
 
         return new Framebuffer::Tile[tileCount];
     }
 
-    //doing redundant computations in initializers
-    //is this really worth it to make the framebuffer immutable?
-    Framebuffer::Framebuffer(int width, int height) :
-        width(clampFramebufferDimension(width)),
-        height(clampFramebufferDimension(height)),
+    Framebuffer::Framebuffer(int2 size) :
+        size(
+            getFramebufferSize(size)
+        ),
 
-        tileCountX(divideAndRoundUp(clampFramebufferDimension(width), Framebuffer::TileSize)),
-        tileCountY(divideAndRoundUp(clampFramebufferDimension(height), Framebuffer::TileSize)),
-
-        tiles(initializeFramebufferTiles(
-            clampFramebufferDimension(width),
-            clampFramebufferDimension(height)
-        ))
+        directionalTileCount(
+            getDirectionalTileCount(
+                getFramebufferSize(size)
+            )
+        ),
+        
+        tiles(
+            initializeFramebufferTiles(
+                getDirectionalTileCount(
+                    getFramebufferSize(size)
+                )
+            )
+        )
     {
+        //nothing to do in constructor body -
+        //everything is done in initializers
+        
+        //this has the benefit of working with const members,
+        //but at the cost of readability and redundant computations
+        //is it really worth it?
     }
 
     Framebuffer::~Framebuffer() {
         delete[] tiles;
     }
 
-    void clearFramebuffer(Framebuffer* const framebuffer, unsigned char clearValue[3]) {
-        const int tileCount = framebuffer->tileCountX * framebuffer->tileCountY;
+    void clearFramebuffer(Framebuffer* const framebuffer, color8 clearColor) {
+        const int tileCount = framebuffer->directionalTileCount.x * framebuffer->directionalTileCount.y;
 
         for (int tileIndex = 0; tileIndex < tileCount; tileIndex++) {
-            unsigned char* const tileData = framebuffer->tiles[tileIndex].data;
+            color8* const tileData = framebuffer->tiles[tileIndex].data;
 
             for (int i = 0; i < Framebuffer::TileSize2; i++) {
-                unsigned char* const pixel = tileData + (3 * i);
+                color8* const pixel = tileData + i;
 
-                pixel[0] = clearValue[0];
-                pixel[1] = clearValue[1];
-                pixel[2] = clearValue[2];
+                *pixel = clearColor;
             }
         }
     }
@@ -67,25 +84,28 @@ namespace Renderer {
     ) {
         SDL_LockSurface(surface);
         
-        unsigned char* const pixels = (unsigned char*)surface->pixels;
+        uint8* const pixels = (uint8*)surface->pixels;
 
-        for (int y = 0; y < surface->h; y++) {
-            unsigned char* const rowStart = (unsigned char*)(pixels + (surface->pitch * y));
-            for (int x = 0; x < surface->w; x += Framebuffer::TileSize) {
-                int tileCoordX = x / Framebuffer::TileSize;
-                int tileCoordY = y / Framebuffer::TileSize;
+        int2 globalPixelCoord;
+        for (globalPixelCoord.y = 0; globalPixelCoord.y < surface->h; globalPixelCoord.y++) {
+            uint8* const rowStart = (uint8*)(pixels + (surface->pitch * globalPixelCoord.y));
+            for (globalPixelCoord.x = 0; globalPixelCoord.x < surface->w; globalPixelCoord.x += Framebuffer::TileSize) {
+                int2 tileCoord = globalPixelCoord / int2(Framebuffer::TileSize, Framebuffer::TileSize);
 
-                Framebuffer::Tile& tile = framebuffer->tiles[tileCoordX + framebuffer->tileCountX * tileCoordY];
-                unsigned char* const framebufferSection = tile.data + 3*(Framebuffer::TileSize * (y % Framebuffer::TileSize));
+                Framebuffer::Tile& tile = framebuffer->tiles[tileCoord.x + framebuffer->directionalTileCount.x * tileCoord.y];
+                const color8* const framebufferSection = tile.data + Framebuffer::TileSize * (globalPixelCoord.y % Framebuffer::TileSize);
 
                 for (int i = 0; i < Framebuffer::TileSize; i++) {
-                    const unsigned char* const framebufferPixel = framebufferSection + (3 * i);
+                    const color8 framebufferPixel = framebufferSection[i];
 
-                    unsigned char* const surfacePixel = rowStart + (4 * (x+i));
-
-                    surfacePixel[0] = framebufferPixel[2];
-                    surfacePixel[1] = framebufferPixel[1];
-                    surfacePixel[2] = framebufferPixel[0];
+                    //SDL's surface pixels are 4 bytes each
+                    //use multiples of 4 bytes to find the correct pixel,
+                    //then just set unused alpha to 255
+                    uint8* const surfacePixel = rowStart + (4 * (globalPixelCoord.x+i));
+                    
+                    surfacePixel[0] = framebufferPixel.b;
+                    surfacePixel[1] = framebufferPixel.g;
+                    surfacePixel[2] = framebufferPixel.r;
                     surfacePixel[3] = 255;
                 }
             }
