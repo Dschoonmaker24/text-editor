@@ -44,11 +44,14 @@ namespace Application {
 			case SDL_EVENT_QUIT:
 				ApplicationRunning = false;
 				break;
+			case SDL_EVENT_WINDOW_RESIZED:
+				NeedsRender = true;
 			}
 		}
 
 		if (NeedsRender) {
 			Renderer::render();
+			NeedsRender = false;
 		}
 	}
 }
