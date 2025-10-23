@@ -4,7 +4,7 @@ struct SDL_Surface;
 
 namespace Renderer {
     struct Framebuffer {
-        const int2 size;
+        int2 size;
 
         //pixel data, laid out row by row
         color8* data;

@@ -15,8 +15,8 @@ namespace Renderer {
 	Bitmap* TestBitmap;
 
 	Bitmap* createTestBitmap() {
-		Bitmap* bitmap = new Bitmap({100, 100});
-		
+		Bitmap* bitmap = new Bitmap({ 100, 100 });
+
 		int2 coord;
 		for (coord.y = 0; coord.y < bitmap->size.y; coord.y++) {
 			color8alpha* row = bitmap->data + (bitmap->size.x * coord.y);
@@ -33,10 +33,10 @@ namespace Renderer {
 				circlePos.x = circlePos.x * 2 - bitmap->size.x;
 				circlePos.y = circlePos.y * 2 - bitmap->size.y;
 
-				int l = circlePos.x*circlePos.x + circlePos.y*circlePos.y;
+				int l = circlePos.x * circlePos.x + circlePos.y * circlePos.y;
 
-				color.a = l < bitmap->size.x*bitmap->size.x ? 255 : 0;
-				
+				color.a = l < bitmap->size.x * bitmap->size.x ? 255 : 0;
+
 				row[coord.x] = color;
 			}
 		}
@@ -72,15 +72,15 @@ namespace Renderer {
 		color8 clearColor = { 128, 0, 0 };
 
 		clearFramebuffer(MainFramebuffer, clearColor);
-
-		drawRect({100, 100}, {200, 200}, {0, 0, 128, 255}, MainFramebuffer);
+		
+		drawRect({ 100, 100 }, { 200, 200 }, { 0, 0, 128, 255 }, MainFramebuffer);
 		drawBitmap(TestBitmap, { 400, 100 }, MainFramebuffer);
 
 		copyFramebufferToSurface(MainFramebuffer, MainWindowSurface);
 
 		SDL_UpdateWindowSurface(Application::MainWindow);
 	}
-	
+
 	void handleResizes() {
 		int2 newViewportSize;
 

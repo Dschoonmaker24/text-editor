@@ -3,35 +3,15 @@
 #include <SDL3/SDL.h>
 
 namespace Renderer {
-	//returns framebuffer size, with a minimum size of 1x1
-	int2 framebufferSize(int2 desiredSize) {
-		int2 size = desiredSize;
+	Framebuffer::Framebuffer(int2 size) {
 		size.x = size.x < 1 ? 1 : size.x;
 		size.y = size.y < 1 ? 1 : size.y;
-		
-		return size;
-	}
 
-	color8* allocateFramebufferData(int2 size) {
+		this->size = size;
+
 		int pixelCount = size.x * size.y;
 
-		return new color8[pixelCount];
-	}
-
-	Framebuffer::Framebuffer(int2 size) :
-		size(
-			framebufferSize(size)
-		),
-
-		data(
-			allocateFramebufferData(framebufferSize(size))
-		)
-	{
-		//nothing to do in constructor body -
-		//everything is done in initializers
-		
-		//this has the benefit of working with const members,
-		//but at the cost of readability and redundant computations
+		this->data = new color8[pixelCount];
 	}
 
 	Framebuffer::~Framebuffer() {

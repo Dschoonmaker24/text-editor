@@ -2,9 +2,9 @@
 
 namespace Renderer {
 	struct Bitmap {
-		const int2 size;
+		int2 size;
 
-		color8alpha* const data;
+		color8alpha* data;
 
 		Bitmap(int2 size);
 		~Bitmap();
