@@ -1,6 +1,7 @@
 #include "Application.hpp"
 
 #include "Renderer/Renderer.hpp"
+#include "FontLoader.hpp"
 
 #include <SDL3/SDL.h>
 
@@ -15,9 +16,20 @@ namespace Application {
 		);
 
 		Renderer::initialize();
+
+		FontLoader::initialize();
+
+		MainFontData = new FontLoader::FontData();
+
+		FontLoader::loadFontDataFromFile("arial.ttf", MainFontData);
+		FontLoader::generateFontFromFontData(MainFontData, 256, MainFont);
+		Renderer::MainFont = &MainFont;
 	}
 
 	void shutdown() {
+		delete MainFontData;
+		FontLoader::shutdown();
+
 		Renderer::shutdown();
 
 		SDL_DestroyWindow(MainWindow);

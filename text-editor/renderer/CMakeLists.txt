@@ -7,4 +7,5 @@ target_sources(TextEditorApplication PRIVATE
 	"${CMAKE_CURRENT_SOURCE_DIR}/Bitmap.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/DrawFunctions.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/DrawFunctions.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/Font.hpp"
 )

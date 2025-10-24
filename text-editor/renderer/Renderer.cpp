@@ -12,39 +12,6 @@ namespace Renderer {
 
 	int2 ViewportSize;
 
-	Bitmap* TestBitmap;
-
-	Bitmap* createTestBitmap() {
-		Bitmap* bitmap = new Bitmap({ 100, 100 });
-
-		int2 coord;
-		for (coord.y = 0; coord.y < bitmap->size.y; coord.y++) {
-			color8alpha* row = bitmap->data + (bitmap->size.x * coord.y);
-
-			for (coord.x = 0; coord.x < bitmap->size.x; coord.x++) {
-				color8alpha color = {
-					0, 0, 0, 255
-				};
-
-				color.r = coord.x * 255 / bitmap->size.x;
-				color.g = coord.y * 255 / bitmap->size.y;
-
-				int2 circlePos = coord;
-				circlePos.x = circlePos.x * 2 - bitmap->size.x;
-				circlePos.y = circlePos.y * 2 - bitmap->size.y;
-
-				int l = circlePos.x * circlePos.x + circlePos.y * circlePos.y;
-
-				color.a = l < bitmap->size.x * bitmap->size.x ? 255 : 0;
-
-				row[coord.x] = color;
-			}
-		}
-
-
-		return bitmap;
-	}
-
 	void initialize() {
 		MainWindowSurface = SDL_GetWindowSurface(Application::MainWindow);
 
@@ -54,13 +21,9 @@ namespace Renderer {
 		);
 
 		MainFramebuffer = new Framebuffer(ViewportSize);
-
-		TestBitmap = createTestBitmap();
 	}
 
 	void shutdown() {
-		delete TestBitmap;
-
 		delete MainFramebuffer;
 	}
 
@@ -74,7 +37,7 @@ namespace Renderer {
 		clearFramebuffer(MainFramebuffer, clearColor);
 		
 		drawRect({ 100, 100 }, { 200, 200 }, { 0, 0, 128, 255 }, MainFramebuffer);
-		drawBitmap(TestBitmap, { 400, 100 }, MainFramebuffer);
+		drawBitmap(&MainFont->glyphBitmaps[70], { 400, 100 }, MainFramebuffer);
 
 		copyFramebufferToSurface(MainFramebuffer, MainWindowSurface);
 
@@ -97,7 +60,6 @@ namespace Renderer {
 
 		MainWindowSurface = SDL_GetWindowSurface(Application::MainWindow);
 
-		delete MainFramebuffer;
-		MainFramebuffer = new Framebuffer(ViewportSize);
+		MainFramebuffer->resize(ViewportSize);
 	}
 }

@@ -10,12 +10,20 @@ namespace Renderer {
 		this->size = size;
 
 		int pixelCount = size.x * size.y;
-
-		this->data = new color8[pixelCount];
+		data = new color8[pixelCount];
 	}
 
 	Framebuffer::~Framebuffer() {
 		delete[] data;
+	}
+
+	void Framebuffer::resize(int2 newSize) {
+		delete[] data;
+
+		size = newSize;
+
+		int pixelCount = size.x * size.y;
+		data = new color8[pixelCount];
 	}
 
 	void clearFramebuffer(Framebuffer* const framebuffer, color8 clearColor) {

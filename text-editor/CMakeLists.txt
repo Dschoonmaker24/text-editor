@@ -4,6 +4,8 @@ target_sources(TextEditorApplication PRIVATE
 	"${CMAKE_CURRENT_SOURCE_DIR}/EntryPoint.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/Application.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/Application.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/FontLoader.hpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/FontLoader.cpp"
 )
 
 target_include_directories(TextEditorApplication PRIVATE

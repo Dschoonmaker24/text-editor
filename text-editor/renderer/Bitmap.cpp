@@ -1,5 +1,7 @@
 #include "Bitmap.hpp"
 
+#include <string.h>
+
 namespace Renderer {
 	Bitmap::Bitmap(int2 size) {
 		size.x = size.x < 1 ? 1 : size.x;
@@ -11,7 +13,40 @@ namespace Renderer {
 		this->data = new color8alpha[pixelCount];
 	}
 
+	Bitmap::Bitmap(const Bitmap& bitmap) {
+		size = bitmap.size;
+
+		int pixelCount = size.x * size.y;
+		data = new color8alpha[pixelCount];
+
+		memcpy(data, bitmap.data, pixelCount * sizeof(data[0]));
+	}
+
+	Bitmap& Bitmap::operator=(const Bitmap & bitmap) {
+		size = bitmap.size;
+
+		int pixelCount = size.x * size.y;
+		data = new color8alpha[pixelCount];
+
+		memcpy(data, bitmap.data, pixelCount * sizeof(data[0]));
+
+		return *this;
+	}
+
 	Bitmap::~Bitmap() {
-		delete[] data; 
+		if (data != nullptr) {
+			delete[] data;
+		}
+	}
+
+	void Bitmap::resize(int2 newSize) {
+		if (data != nullptr) {
+			delete[] data;
+		}
+
+		size = newSize;
+
+		int pixelCount = size.x * size.y;
+		this->data = new color8alpha[pixelCount];
 	}
 }

@@ -1,5 +1,7 @@
 #include "DrawFunctions.hpp"
 
+#include <stdio.h>
+
 namespace Renderer {
 	void clipRect(int2& rectMin, int2& rectMax, int2 boundsMin, int2 boundsMax) {
 		rectMin.x = rectMin.x < boundsMin.x ? boundsMin.x : rectMin.x;
