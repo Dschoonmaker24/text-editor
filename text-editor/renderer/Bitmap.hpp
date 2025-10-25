@@ -1,11 +1,12 @@
 #pragma once
 
 namespace Renderer {
+	//single channel bitmap
 	struct Bitmap {
 		//size of the bitmap, read-only
 		int2 size;
 
-		color8alpha* data;
+		uint8* data;
 
 		Bitmap() {
 			size = int2{0, 0};

@@ -10,14 +10,14 @@ namespace Renderer {
 		this->size = size;
 
 		int pixelCount = size.x * size.y;
-		this->data = new color8alpha[pixelCount];
+		this->data = new uint8[pixelCount];
 	}
 
 	Bitmap::Bitmap(const Bitmap& bitmap) {
 		size = bitmap.size;
 
 		int pixelCount = size.x * size.y;
-		data = new color8alpha[pixelCount];
+		data = new uint8[pixelCount];
 
 		memcpy(data, bitmap.data, pixelCount * sizeof(data[0]));
 	}
@@ -26,7 +26,7 @@ namespace Renderer {
 		size = bitmap.size;
 
 		int pixelCount = size.x * size.y;
-		data = new color8alpha[pixelCount];
+		data = new uint8[pixelCount];
 
 		memcpy(data, bitmap.data, pixelCount * sizeof(data[0]));
 
@@ -47,6 +47,6 @@ namespace Renderer {
 		size = newSize;
 
 		int pixelCount = size.x * size.y;
-		this->data = new color8alpha[pixelCount];
+		this->data = new uint8[pixelCount];
 	}
 }

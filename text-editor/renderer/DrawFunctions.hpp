@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Framebuffer.hpp"
-#include "Bitmap.hpp"
+#include "Font.hpp"
 
 namespace Renderer {
 	void drawRect(
@@ -11,6 +11,15 @@ namespace Renderer {
 
 	void drawBitmap(
 		const Bitmap* const bitmap,
+		color8alpha color,
+		int2 origin,
+		const Framebuffer* const framebuffer
+	);
+
+	void drawText(
+		const char* text,
+		const Font* const font,
+		color8alpha color,
 		int2 origin,
 		const Framebuffer* const framebuffer
 	);

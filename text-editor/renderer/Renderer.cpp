@@ -33,11 +33,15 @@ namespace Renderer {
 		handleResizes();
 
 		color8 clearColor = { 128, 0, 0 };
-
-		clearFramebuffer(MainFramebuffer, clearColor);
 		
-		drawRect({ 100, 100 }, { 200, 200 }, { 0, 0, 128, 255 }, MainFramebuffer);
-		drawBitmap(&MainFont->glyphBitmaps[70], { 400, 100 }, MainFramebuffer);
+		clearFramebuffer(MainFramebuffer, clearColor);
+		drawText(
+			"hello world",
+			MainFont,
+			{ 0, 0, 0, 255 },
+			{ 100, 100 },
+			MainFramebuffer
+		);
 
 		copyFramebufferToSurface(MainFramebuffer, MainWindowSurface);
 

@@ -22,7 +22,7 @@ namespace Application {
 		MainFontData = new FontLoader::FontData();
 
 		FontLoader::loadFontDataFromFile("arial.ttf", MainFontData);
-		FontLoader::generateFontFromFontData(MainFontData, 256, MainFont);
+		FontLoader::generateFontFromFontData(MainFontData, 16, MainFont);
 		Renderer::MainFont = &MainFont;
 	}
 

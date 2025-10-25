@@ -1,7 +1,5 @@
 #include "DrawFunctions.hpp"
 
-#include <stdio.h>
-
 namespace Renderer {
 	void clipRect(int2& rectMin, int2& rectMax, int2 boundsMin, int2 boundsMax) {
 		rectMin.x = rectMin.x < boundsMin.x ? boundsMin.x : rectMin.x;
@@ -21,7 +19,7 @@ namespace Renderer {
 		int2 rectMin, int2 rectMax, color8alpha color,
 		const Framebuffer* const framebuffer
 	) {
-		color8 dstColor = { color.r, color.g, color.b };
+		color8 srcColor = { color.r, color.g, color.b };
 		uint8 blendFactor = color.a;
 
 		clipRect(rectMin, rectMax, { 0, 0 }, framebuffer->size);
@@ -32,9 +30,9 @@ namespace Renderer {
 			color8* framebufferRow = framebuffer->data + (framebuffer->size.x * pixelCoord.y);
 
 			for (pixelCoord.x = rectMin.x; pixelCoord.x < rectMax.x; pixelCoord.x++) {
-				color8 srcColor = framebufferRow[pixelCoord.x];
+				color8 dstColor = framebufferRow[pixelCoord.x];
 
-				color8 blendedColor = blendColors(srcColor, dstColor, blendFactor);
+				color8 blendedColor = blendColors(dstColor, srcColor, blendFactor);
 
 				framebufferRow[pixelCoord.x] = blendedColor;
 			}
@@ -43,6 +41,7 @@ namespace Renderer {
 
 	void drawBitmap(
 		const Bitmap* const bitmap,
+		color8alpha color,
 		int2 origin,
 		const Framebuffer* const framebuffer
 	) {
@@ -56,20 +55,48 @@ namespace Renderer {
 		int2 bitmapCoord = bitmapRelativeRectMin;
 		for (framebufferCoord.y = rectMin.y; framebufferCoord.y < rectMax.y; framebufferCoord.y++, bitmapCoord.y++) {
 			color8* framebufferRow = framebuffer->data + (framebuffer->size.x * framebufferCoord.y);
-			color8alpha* bitmapRow = bitmap->data + (bitmap->size.x * bitmapCoord.y);
+			uint8* bitmapRow = bitmap->data + (bitmap->size.x * bitmapCoord.y);
 
 			bitmapCoord.x = bitmapRelativeRectMin.x;
 			for (framebufferCoord.x = rectMin.x; framebufferCoord.x < rectMax.x; framebufferCoord.x++, bitmapCoord.x++) {
-				color8 srcColor = framebufferRow[framebufferCoord.x];
+				color8 dstColor = framebufferRow[framebufferCoord.x];
 
-				color8alpha bitmapColor = bitmapRow[bitmapCoord.x];
-				color8 dstColor = { bitmapColor.r, bitmapColor.g, bitmapColor.b };
-				uint8 blendFactor = bitmapColor.a;
+				uint8 bitmapAlpha = bitmapRow[bitmapCoord.x];
+				color8 srcColor = {
+					bitmapAlpha * color.r / 255,
+					bitmapAlpha * color.g / 255,
+					bitmapAlpha * color.b / 255
+				};
 
-				color8 blendedColor = blendColors(srcColor, dstColor, blendFactor);
+				color8 blendedColor = blendColors(dstColor, srcColor, bitmapAlpha);
 
 				framebufferRow[framebufferCoord.x] = blendedColor;
 			}
+		}
+	}
+
+	void drawText(
+		const char* text,
+		const Font* const font,
+		color8alpha color,
+		int2 origin,
+		const Framebuffer* const framebuffer
+	) {
+		int2 currentPos = origin;
+		
+		for(int i = 0; text[i] != '\0'; i++) {
+			char c = text[i];
+
+			const Font::GlyphInfo& glyphInfo = font->glyphInfo[c];
+
+			drawBitmap(
+				&font->glyphBitmaps[c],
+				color,
+				currentPos + glyphInfo.bearing,
+				framebuffer
+			);
+
+			currentPos.x += glyphInfo.advance;
 		}
 	}
 }

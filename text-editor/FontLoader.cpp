@@ -30,12 +30,7 @@ namespace FontLoader {
 
 	void generateFontFromFontData(FontData* fontData, int pixelSize, Renderer::Font& font) {
 		Renderer::Bitmap errorBitmap({ 1, 1 });
-		errorBitmap.data[0] = color8alpha {
-			.r = 255,
-			.g = 0,
-			.b = 255,
-			.a = 255
-		};
+		errorBitmap.data[0] = 255;
 
 		FT_Set_Pixel_Sizes(fontData->ftFace, 0, pixelSize);
 
@@ -43,7 +38,7 @@ namespace FontLoader {
 			Renderer::Font::GlyphInfo& glyphInfo = font.glyphInfo[glyphIndex];
 			Renderer::Bitmap& bitmap = font.glyphBitmaps[glyphIndex];
 
-			FT_Error error = FT_Load_Glyph(fontData->ftFace, glyphIndex, FT_LOAD_RENDER);
+			FT_Error error = FT_Load_Char(fontData->ftFace, glyphIndex, FT_LOAD_RENDER);
 
 			if (error != FT_Err_Ok) {
 				bitmap = errorBitmap;
@@ -55,7 +50,7 @@ namespace FontLoader {
 
 			glyphInfo.bearing = int2 {
 				ftGlyph->bitmap_left,
-				ftGlyph->bitmap_top
+				-ftGlyph->bitmap_top
 			};
 
 			//convert from fixed-point fraction to integer number of pixels
@@ -69,16 +64,12 @@ namespace FontLoader {
 			int2 coord;
 			for (coord.y = 0; coord.y < bitmap.size.y; coord.y++) {
 				const unsigned char* const srcRow = ftGlyph->bitmap.buffer + (ftGlyph->bitmap.pitch * coord.y);
-				color8alpha* const dstRow = bitmap.data + (bitmap.size.x * coord.y);
+				uint8* const dstRow = bitmap.data + (bitmap.size.x * coord.y);
 
 				for (coord.x = 0; coord.x < bitmap.size.x; coord.x++) {
 					const unsigned int alpha = srcRow[coord.x];
 
-					color8alpha color = {
-						0, 0, 0, alpha
-					};
-
-					dstRow[coord.x] = color;
+					dstRow[coord.x] = alpha;
 				}
 			}
 		}
